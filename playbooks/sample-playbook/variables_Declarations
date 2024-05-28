@@ -1,0 +1,5 @@
+vars:
+package: vim,yum-utils,git
+tasks:
+- name: Install Package
+  yum: name={{ package }} state=latest

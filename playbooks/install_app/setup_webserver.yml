@@ -1,0 +1,57 @@
+---
+- name: Set up a web server and deploy a static website
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install required packages
+      yum:
+        name:
+          - git
+          - httpd
+          - wget
+          - unzip
+        state: present
+
+    - name: Start and enable the httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    # Uncomment the following tasks if you need to create the DevOps group and Serge user
+    # - name: Create DevOps group
+    #   group:
+    #     name: DevOps
+
+    # - name: Create Serge user
+    #   user:
+    #     name: Serge
+    #     group: DevOps
+
+    - name: Download the static website archive
+      get_url:
+        url: https://github.com/utrains/static-resume/archive/refs/heads/main.zip
+        dest: /tmp/main.zip
+
+    - name: Unzip the downloaded archive
+      unarchive:
+        src: /tmp/main.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Copy the website files to the web root
+      copy:
+        src: /tmp/static-resume-main/
+        dest: /var/www/html/
+        remote_src: yes
+
+    - name: Clean up temporary files
+      file:
+        path: /tmp/main.zip
+        state: absent
